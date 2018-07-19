@@ -18,13 +18,19 @@ public class ViewController {
         return "login";
     }
 
-    @RequestMapping("/view/{path}")
+    @RequestMapping("/{path}")
     public String view(@PathVariable String path){
         return path;
     }
 
-    @RequestMapping("/view/{path}/{path1}")
+
+    @RequestMapping("{path}/{path1}")
     public String view(@PathVariable String path,@PathVariable String path1){
         return path+"/"+path1;
+    }
+
+    @RequestMapping("{path}/{path1}/{path2}")
+    public String view(@PathVariable String path,@PathVariable String path1,@PathVariable String path2){
+        return path+"/"+path1+"/"+path2;
     }
 }
