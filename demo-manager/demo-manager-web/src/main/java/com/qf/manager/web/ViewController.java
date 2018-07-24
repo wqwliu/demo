@@ -19,18 +19,17 @@ public class ViewController {
     }
 
     @RequestMapping("/{path}")
-    public String view(@PathVariable String path){
+    public String view1(@PathVariable String path){
         return path;
     }
 
-
-    @RequestMapping("{path}/{path1}")
-    public String view(@PathVariable String path,@PathVariable String path1){
-        return path+"/"+path1;
+    @RequestMapping("/pages/{path1}")
+    public String view2(@PathVariable String path1){
+        return "pages/"+path1;
     }
 
-    @RequestMapping("{path}/{path1}/{path2}")
-    public String view(@PathVariable String path,@PathVariable String path1,@PathVariable String path2){
-        return path+"/"+path1+"/"+path2;
+    @RequestMapping("/pages/{path1}/{path2}")
+    public String view2(@PathVariable String path1,@PathVariable String path2){
+        return "pages/"+path1+"/"+path2;
     }
 }

@@ -1,0 +1,264 @@
+{extend name="template/layui" /}
+{block name="content"}
+<div class="layui-btn-group acFroTable layui-layout-right">
+    <button class="layui-btn" data-type="getAdd"><i class="layui-icon">&#xe654;</i></button>
+    <button class="layui-btn" data-type="getDelData"><i class="layui-icon">&#xe640;</i></button>
+    <button class="layui-btn" data-type="getRefresh">刷新</button>
+</div>
+    <form id="searchForm" class="layui-form layui-form-pane">
+        <div class="layui-inline">
+            <label class="layui-form-label">品名</label>
+            <div class="layui-input-inline" style="width: 150px;">
+                <input type="text" name="title" class="layui-input" placeholder="请输入关键字">
+            </div>
+        </div>
+        <div class="layui-inline">
+            <div class="layui-input-inline" style="width: 150px;">
+                <input type="text" name="pno" class="layui-input" placeholder="产品编码">
+            </div>
+        </div>
+        <div class="layui-inline">
+            <div class="layui-input-inline" style="width: 150px;">
+                <select name="classid" multiple="multiple" lay-seach>
+                    <option value="">类别</option>
+                    {volist name=":ShowList('ww_category','pid=2','seq')" id="vo"}
+                    <option value="{$vo.id?? ''}">{$vo.catename}</option>
+                    {/volist}
+                </select>
+            </div>
+        </div>
+        <div class="layui-inline">
+            <div class="layui-input-inline" style="width: 150px;">
+                <select name="gys" multiple="multiple" lay-seach>
+                    <option value="">供应商</option>
+                    {volist name=":ShowList('ww_erp_gys','','id')" id="vo"}
+                    <option value="{$vo.id?? ''}">{$vo.title?? ''}</option>
+                    {/volist}
+                </select>
+            </div>
+        </div>
+        <div class="layui-inline">
+            <div class="layui-input-inline" style="width: 150px;">
+                <select name="quyu" lay-seach>
+                    <option value="">分销点</option>
+                    {volist name=":ShowList('ww_shop_shanghu','','seq')" id="vo"}
+                    <option value="{$vo.id?? ''}">{$vo.title?? ''}</option>
+                    {/volist}
+                </select>
+            </div>
+        </div>
+            <button type="button" class="layui-btn" lay-submit lay-filter="search"><i class="layui-icon">&#xe615;</i></button>
+    </form>
+    <table class="layui-hide" id="dataTable" lay-filter="dataTable"  data-anim="layui-anim-up"></table>
+{/block}
+{block name="script"}
+<!--操作-->
+<script type="text/html" id="caozuo">
+    <a class="layui-btn layui-btn-xs" lay-event="edit">编辑</a>
+    <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>
+    <a class="layui-btn layui-btn-normal layui-btn-xs" lay-event="view">报表</a>
+</script>
+<script type="text/html" id="title">
+    <a href="{:url('Index/Goods/view')}?czid={{d.id}}" class="layui-table-link" target="_blank">{{ d.title }}</a>
+</script>
+<script type="text/html" id="zhuangtaiTpl">
+    <input type="checkbox" name="zhuangtai" id="{{d.id}}" value="{{d.zhuangtai}}" lay-skin="switch" lay-text="在售|下架" lay-filter="zhuangtai" {{ d.zhuangtai == '出售中' ? 'checked' : '' }}>
+</script>
+<script type="text/html" id="tuijian">
+    <input type="checkbox" name="istuijian" id="{{d.id}}" value="{{d.istuijian}}" lay-skin="switch" lay-text="是|否" lay-filter="tuijian" {{ d.istuijian == '1' ? 'checked' : '' }}>
+</script>
+<script>
+layui.use('table', function(){
+    var table = layui.table,form = layui.form,layer = layui.layer,$= layui.jquery,thisTitle='商品';
+    layui.selMeltiple($);
+    table.render({
+        elem: '#dataTable'
+        ,url: "{:url('/Admin/Goods/show')}"
+        ,cellMinWidth: 80
+        ,initSort: {field:'posttime', type:'desc'}
+        ,page:true
+        ,cols: [[
+            {type:'checkbox', fixed: 'left'}
+            , {field: 'pno', title: '编码', width: 100, sort: true,edit:'text'}
+            , {field: 'title', title: '品名', sort: true}
+            , {field: 'catename', title: '类目', width: 130 ,sort: true}
+            , {field: 'chandi', title: '产地', width: 130,sort: true,edit:'text'}
+            , {field: 'guige', title: '规格', width: 110 ,sort: true,edit:'text'}
+//                , {field: 'gysname', title: '供应商', width: 110, sort: true}
+            , {field: 'price1', title: '最新进价', width: 100, sort: true,edit:'text'}
+            , {field: 'price2', title: '零售价', width: 100, sort: true,edit:'text'}
+            , {field: 'price', title: '会员价', width: 100, sort: true,edit:'text'}
+            , {field: 'price3', title: '分销价', width: 100, sort: true,edit:'text'}
+            ,{field:'istuijian', title:'推荐', width:100, align:'center', templet: '#tuijian', unresize: true,fixed:'right'}
+            ,{field:'zhuangtai', title:'状态', width:100, align:'center', templet: '#zhuangtaiTpl', unresize: true,fixed: 'right'}
+            ,{ width:180, align:'center', title:'操作', toolbar: '#caozuo', fixed: 'right'}
+        ]]
+    });
+    //工具条事件
+    table.on('tool(dataTable)', function(obj){ //注：tool是工具条事件名，test是table原始容器的属性 lay-filter="对应的值"
+        var data = obj.data;
+        if(obj.event === 'del'){
+            layer.confirm('确认删除吗?', function(index){
+                _acDel(data.id);
+                obj.del();
+                layer.close(index);
+            });
+        } else if(obj.event === 'edit'){
+            _add('编辑'+thisTitle,'edit?id='+data.mainid);
+        } else if(obj.event === 'view'){
+            _add(thisTitle+'报表','view?czid='+data.id,'95%','95%');
+        }
+    });
+    //自定义操作
+    form.on('switch(zhuangtai)', function(obj){
+        var czid=this.id;
+        var what=this.name;
+        var val=obj.elem.checked?'出售中':'已下架';
+        _acFun(czid,what,val);
+    });
+    form.on('switch(tuijian)', function(obj){
+        var czid=this.id;
+        var what=this.name;
+        var val=obj.elem.checked?'1':'0';
+        _acFun(czid,what,val);
+    });
+    //layuiTable通用定义开始----------------------------------------
+    //监听单元格编辑
+    table.on('edit(dataTable)', function(obj){
+        var value = obj.value //得到修改后的值
+                ,data = obj.data //得到所在行所有键值
+                ,field = obj.field //得到字段
+                ,czid=obj.data.id;//得到操作行ID
+        _acFun(czid,field,value);
+    });
+    //监听查找条件
+    form.on('submit(search)', function(data){
+        var param = $("#searchForm").serialize();
+        table.reload('dataTable', {
+            url: "show?"+param,
+        });
+        return false;
+    });
+    //监听表头排序
+    table.on('sort(dataTable)', function(obj){ //注：tool是工具条事件名，test是table原始容器的属性 lay-filter="对应的值"
+        console.log(obj.field); //当前排序的字段名
+        console.log(obj.type); //当前排序类型：desc（降序）、asc（升序）、null（空对象，默认排序）
+        table.reload('dataTable', {
+            initSort: obj //记录初始排序，如果不设的话，将无法标记表头的排序状态。 layui 2.1.1 新增参数
+            ,where: { //请求参数（注意：这里面的参数可任意定义，并非下面固定的格式）
+                field: obj.field //排序字段
+                ,order: obj.type //排序方式
+            }
+        });
+    });
+    //定义操作功能区按钮事件
+    $('.acFroTable .layui-btn').on('click', function(){
+        var type = $(this).data('type');
+        active[type] ? active[type].call(this) : '';
+        return false;
+    });
+    //监听操作功能区按钮事件
+    var $ = layui.$, active = {
+        getAdd: function(){ //添加
+            my_add('添加'+thisTitle,'/Admin/Goods/edit.html');
+        }
+        ,getRefresh: function(){ //刷新
+            location.reload();
+        }
+        ,getDelData: function(){ //删除
+            var checkStatus = table.checkStatus('dataTable')
+                    ,data = checkStatus.data
+                    ,title_all = ''
+                    ,ids_str = '';
+            $.each(data,function(key,item) {
+                title_all += "," + item.title;
+                ids_str += "," + item.id;
+            });
+            title_all = title_all.replace(/(^[,]*)|([,]*$)/g, "");
+            ids_str = ids_str.replace(/(^[,]*)|([,]*$)/g, "");
+            if(!ids_str) {
+                layer.msg('请先选择要删除的数据!');
+            }else{
+                layer.confirm('真的删除' + title_all + '这些数据吗?', function(index){
+                    var jqxhr=$.ajax({data:'czid=' + ids_str, url:"delete?1=1" , type:'get'});
+                    jqxhr.done(function(re){
+                        if (re.code == 1) {
+                            layer.close(index);
+                            //location.reload();
+                            table.reload('dataTable', {});
+                            return false;
+                        }else{
+                            layer.close(index);
+                            layer.msg('删除失败');
+                            return false;
+                        }
+                    });
+                });
+            }
+        }
+    };
+    //响应删除执行
+    //by wf 2017-12-12
+    function _acDel(czid) {
+        $.ajax({
+            url: 'delete?czid='+czid,
+            type: "post",
+            dataType: "json",
+            success: function (data) {
+                layer.msg(data.msg, {icon: data.code});
+            },
+            error: function (XMLHttpRequest, textStatus, errorThrown) {
+                layer.tips('删除失败');
+            },
+            beforeSend: function () {
+            },
+            complete: function () {
+            }
+        });
+    }
+    //*响应执行*//
+    //by wf 2017-12-12
+    function _acFun(czid,what,val) {
+        $.ajax({
+            url: 'acfun?id='+czid+'&'+what+'='+val,
+            type: "post",
+            dataType: "json",
+            success: function (data) {
+                layer.msg(data.msg, {icon: data.code});
+            },
+            error: function (XMLHttpRequest, textStatus, errorThrown) {
+                layer.tips('更新失败');
+            },
+            beforeSend: function () {
+            },
+            complete: function () {
+            }
+        });
+    }
+    //响应弹窗
+    //by wf 2018-2-6
+    function _add(title,url,width,hight){
+        if(!width){
+            width = '100%';
+        }
+        if(!hight){
+            hight = '100%';
+        }
+        layer.open({
+            skin: 'layui-layer-lan', //默认皮肤
+            type:2,
+            title:title, //标题
+            area: [width, hight], //宽高
+            shade: 0.8,//遮罩
+            zIndex:9999,
+            content: url,
+            end: function() {
+                table.reload('dataTable', {});
+            }
+        });
+    }
+    //layuiTable通用定义结束----------------------------------------
+});
+</script>
+{/block}
+

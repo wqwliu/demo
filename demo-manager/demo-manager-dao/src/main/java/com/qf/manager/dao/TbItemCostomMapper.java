@@ -1,8 +1,8 @@
 package com.qf.manager.dao;
-import com.qf.manager.pojo.dto.PageParam;
-import com.qf.manager.pojo.po.TbItem;
+import com.qf.manager.pojo.vo.TbItemCustom;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  *
@@ -12,7 +12,7 @@ import java.util.List;
  */
 public interface TbItemCostomMapper {
 
-    long countItems();
+    long countItems(Map<String, Object> map);
 
-    List<TbItem> showItemByPage(PageParam pageParam);
+    List<TbItemCustom> showItemByPage(Map<String, Object> map);
 }

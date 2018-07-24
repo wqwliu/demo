@@ -1,3 +1,4 @@
+/*
 package com.qf.manager.dao;
 
 import org.junit.Test;
@@ -20,4 +21,4 @@ public class TbStaffMapperTest {
         System.out.println(tbStaffMapper.selectByPrimaryKey(1L));
     }
 
-}
+}*/

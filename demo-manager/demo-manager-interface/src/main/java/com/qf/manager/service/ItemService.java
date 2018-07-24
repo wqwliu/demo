@@ -1,8 +1,11 @@
 package com.qf.manager.service;
 
+import com.qf.manager.pojo.dto.ItemQuery;
 import com.qf.manager.pojo.dto.ItemResult;
 import com.qf.manager.pojo.dto.PageParam;
-import com.qf.manager.pojo.po.TbItem;
+import com.qf.manager.pojo.vo.TbItemCustom;
+
+import java.util.List;
 
 /**
  * @author wq
@@ -10,5 +13,7 @@ import com.qf.manager.pojo.po.TbItem;
  * @since 1.0.0
  */
 public interface ItemService {
-    ItemResult<TbItem> showItemByPage(PageParam pageParam);
+    ItemResult<TbItemCustom> showItemByPage(PageParam pageParam, ItemQuery itemQuery);
+
+    int updateItemsByIds(List<Long> ids);
 }
